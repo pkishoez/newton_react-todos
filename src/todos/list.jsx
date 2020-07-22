@@ -1,9 +1,11 @@
 import React from "react";
+import { Link } from "react-router-dom";
 
 export const TodoList = ({
 	todos,
 	toggleTodo,
 	className,
+	search,
 }) => {
 	return (
 		<div className={className}>
@@ -25,7 +27,17 @@ export const TodoList = ({
 						todo.id
 					)}
 				>
-					{todo.text}
+					<span
+						dangerouslySetInnerHTML={{
+							__html: todo.text
+								.split(
+									search
+								)
+								.join(
+									`<span style='color: yellow;'>${search}</span>`
+								),
+						}}
+					></span>
 				</div>
 			))}
 		</div>

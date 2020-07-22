@@ -3,6 +3,8 @@ import { TodoList } from "./list";
 import {
 	toggleTodo,
 	filterTodos,
+	deleteTodo,
+	searchTodos,
 } from "./util";
 import "./styles.scss";
 
@@ -27,6 +29,7 @@ export class Todos extends React.Component {
 			},
 		],
 		filter: "ALL",
+		search: "",
 	};
 
 	onInputChange = (e) => {
@@ -53,6 +56,7 @@ export class Todos extends React.Component {
 	applyFilter = (filter) => (ev) => {
 		this.setState({ filter });
 	};
+
 	toggleTodo = (id) => (ev) => {
 		this.setState({
 			todos: toggleTodo(
@@ -61,12 +65,24 @@ export class Todos extends React.Component {
 			),
 		});
 	};
+	deleteTodo = (id) => (ev) => {
+		this.setState({
+			todos: deleteTodo(
+				this.state.todos,
+				id
+			),
+		});
+	};
 	getTodos = () => {
-		return filterTodos(
-			this.state.todos,
-			this.state.filter
+		return searchTodos(
+			filterTodos(
+				this.state.todos,
+				this.state.filter
+			),
+			this.state.search
 		);
 	};
+	componentDidCatch() {}
 
 	//   render
 	render() {
@@ -85,8 +101,28 @@ export class Todos extends React.Component {
 							.onInputChange
 					}
 				/>
+				<input
+					placeholder="Search Todo Here"
+					className="addTodoInput"
+					type="text"
+					value={
+						this.state
+							.search
+					}
+					onChange={(e) =>
+						this.setState({
+							search:
+								e.target
+									.value,
+						})
+					}
+				/>
 				{/* TodoList */}
 				<TodoList
+					search={
+						this.state
+							.search
+					}
 					className="todolist"
 					todos={this.getTodos()}
 					toggleTodo={
