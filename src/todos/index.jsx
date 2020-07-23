@@ -11,43 +11,68 @@ import "./styles.scss";
 let index = 4;
 export class Todos extends React.Component {
 	state = {
-		todos: [
-			{
-				text: "Todo1",
-				id: 1,
-				status: "ACTIVE",
-			},
-			{
-				text: "Todo2",
-				id: 2,
-				status: "COMPLETE",
-			},
-			{
-				text: "Todo3",
-				id: 3,
-				status: "ACTIVE",
-			},
-		],
+		todos: [],
 		filter: "ALL",
 		search: "",
 	};
+
+	componentDidMount() {
+		fetch(
+			"http://localhost:2222/api/getTodos"
+		)
+			.then((d) => d.json())
+			.then((d) => {
+				this.setState({
+					todos: d.data,
+				});
+			})
+			.catch((err) => {
+				console.log(
+					"Error",
+					err
+				);
+			});
+	}
 
 	onInputChange = (e) => {
 		if (e.key === "Enter") {
 			const value =
 				e.target.value;
 			if (value.trim() !== "") {
-				this.setState({
-					todos: [
-						{
-							text: value,
-							id: index++,
+				const target = e.target;
+				fetch(
+					"http://localhost:2222/api/addTodo",
+					{
+						method: "POST",
+						body: JSON.stringify(
+							{
+								text: value,
+							}
+						),
+						headers: {
+							"Content-Type":
+								"application/json",
 						},
-						...this.state
-							.todos,
-					],
-				});
-				e.target.value = "";
+					}
+				)
+					.then((d) =>
+						d.json()
+					)
+					.then((d) => {
+						this.setState({
+							todos: [
+								d.data,
+								...this
+									.state
+									.todos,
+							],
+						});
+						target.value =
+							"";
+					})
+					.catch((err) => {
+						// Ignore.
+					});
 			}
 		}
 	};
@@ -58,12 +83,34 @@ export class Todos extends React.Component {
 	};
 
 	toggleTodo = (id) => (ev) => {
-		this.setState({
-			todos: toggleTodo(
-				this.state.todos,
-				id
-			),
-		});
+		fetch(
+			"http://localhost:2222/api/toggleTodo",
+			{
+				method: "POST",
+				body: JSON.stringify({
+					todoid: id,
+					status:
+						this.state.todos.find(
+							(todo) =>
+								todo.id ===
+								id
+						)?.status ===
+						"ACTIVE"
+							? "COMPLETE"
+							: "ACTIVE",
+				}),
+				headers: {
+					"Content-Type":
+						"application/json",
+				},
+			}
+		)
+			.then((d) => d.json())
+			.then((d) => {
+				this.setState({
+					todos: d.data,
+				});
+			});
 	};
 	deleteTodo = (id) => (ev) => {
 		this.setState({
